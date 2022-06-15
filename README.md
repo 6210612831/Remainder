@@ -15,10 +15,15 @@
 >   {<br>
         "name":...(text max lenght 180),
         <br>
-        "repeat":...(yes,no,true,false),
+        "repeat":...(true,false),
         <br>
-        "time":...(datetime (2022-02-3 09:08:00))
+        "start_time":...(datetime (2022-02-3 09:08:00))
+        <br>
+        "every":...(Integer)
+        <br>
+        "period":...(string choice)
     <br>}
 
+period choice => days,hours,minutes,seconds,microseconds
 ## Change token for change line api notify
 `Change global TOKEN variable at line 7 in task/tasks.py`

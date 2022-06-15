@@ -1,11 +1,12 @@
-from calendar import month
-from django.shortcuts import render
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
+import json
+from tkinter.messagebox import NO
+from rest_framework.generics import  ListCreateAPIView
 from task.serializers import TaskSerializer
 from task.models import Task
 from rest_framework.response import Response
 from rest_framework import status  
 from datetime import datetime
+from django_celery_beat.models import PeriodicTask,IntervalSchedule
 
 
 # Create your views here.
@@ -19,54 +20,35 @@ class TaskListApiView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        # day =request.data.get('day')
-        # month = request.data.get('month')
-        # year =  request.data.get('year')
-        # hour = request.data.get('hour')
-        # minute = request.data.get('minute')
-        # try:
-        #     if not (0<int(day)<=30):
-        #         raise Exception
-        #     if not (0<int(month)<=12):
-        #         raise Exception
-        #     if not (0<int(year[2:])<=99):
-        #         raise Exception
-        #     if not (0<=int(hour)<=23):
-        #         raise Exception
-        #     if not (0<=int(minute)<=59):
-        #         raise Exception   
-        # except:
-        #     return Response({"ERROR" : "Your alert time is invalid"}, status=status.HTTP_400_BAD_REQUEST)
-    
+        data = request.data
 
-        # check_date_time_str = f"{day}/{month}/{year[2:]} {hour}:{minute}:00"
-        # # CHECK DATE IS VALID (example -> 29/2/2022 is not real)
-        # try: 
-        #     datetime.strptime(check_date_time_str, '%d/%m/%y %H:%M:%S')
-        # except:
-        #     return Response({"ERROR" : "Your input date cant be real"}, status=status.HTTP_400_BAD_REQUEST)
-        # check_date_time_obj = datetime.strptime(check_date_time_str, '%d/%m/%y %H:%M:%S')
-        # # CHECK INPUT TIME IS OLDER THAN NOW?
-        # if check_date_time_obj < datetime.now():
-        #     return Response({"ERROR" : "Your alert time is older than now"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-        # date_time_str = f"{day}/{month}/{year[2:]} {hour}:{minute}:00++0700"
-        # # CHECK DATE IS VALID (example -> 29/2/2022 is not real)
-        # try: 
-        #     datetime.strptime(date_time_str, '%d/%m/%y %H:%M:%S+%z')
-        # except:
-        #     return Response({"ERROR" : "Your input date cant be real"}, status=status.HTTP_400_BAD_REQUEST)
-        # date_time_obj = datetime.strptime(date_time_str, '%d/%m/%y %H:%M:%S+%z')
-
-        # # INSERT INPUT TO SERIALIZER
-        # data = {
-        #     "name":request.data.get('name'),
-        #     "time":date_time_obj,
-        #     "repeat":True if (request.data.get('repeat')).lower()=="yes" else False,
-        # }
-        serializer = TaskSerializer(data = request.data)
+        serializer = TaskSerializer(data = data)
         if serializer.is_valid():
             serializer.save()
+            
+            name=request.data.get('name')
+            period_obj = PeriodicTask.objects.create(
+                name=name,
+                task="task.tasks.line_alert",
+                enabled = True,
+                start_time=request.data.get('start_time'),
+                one_off=True if (request.data.get('repeat').lower())=="false" else False,
+                interval = IntervalSchedule.objects.first()
+            )
+            if request.data.get('every') and request.data.get('period'):
+                every = int(request.data.get('every'))
+                period = request.data.get('period')
+                if len(IntervalSchedule.objects.filter(every = every,period=period))!=0:
+                    inter = IntervalSchedule.objects.get(every = every,period=period)
+                else:
+                    inter = IntervalSchedule.objects.create(
+                        every = int(request.data.get('every')),
+                        period = request.data.get('period')
+                    )
+                period_obj.interval = inter
+            period_obj.args = '['+"\""+name+"\""+"]"
+            period_obj.save()
+        
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
