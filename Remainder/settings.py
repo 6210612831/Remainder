@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'task',
+    'oauth2_provider',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +52,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+
+}
 
 ROOT_URLCONF = 'Remainder.urls'
 
@@ -123,3 +135,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REMAINDER_KEY = os.environ.get("REMAINDER_KEY", "vHG56PFUW2tjw69GmW6E0XCFuDPGUQtyYvy7jMLs")
+REMAINDER_SECRET = os.environ.get("REMAINDER_SECRET", "dtBFE4OgJx0xzqUDJ7YI8KJMp3BdPZlAOKJ6MJF5t2tN5KCIQskCEz5U2lQrP9IwKD3M9Fw5fyEMiat97mFoAcONCOYXyLvVm9lNsySYWiJjfq6qLBXB05T8ZdAP8qx1")
+
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 0
+
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'monday25436@gmail.com'
+EMAIL_HOST_PASSWORD = 'iduqfimygkyiywfs'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
