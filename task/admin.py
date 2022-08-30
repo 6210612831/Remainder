@@ -1,5 +1,5 @@
 from django.contrib import admin
-from task.models import Storage
+from task.models import Task
 # Register your models here.
 
-admin.site.register(Storage)
+admin.site.register(Task)

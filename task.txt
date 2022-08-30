@@ -1,0 +1,20 @@
+-Front-end use card
+-Extends card to set alert time (To email)
+
+
+-Create model for task (task detail + owner)
+- use task model to add task
+-when set alert time create periodtask model to alert
+
+
+-User independent card
+-Authen
+-User create/update/delete card
+-can select for re-use card
+
+- use username + task_name for peroid task name
+
+
+-deploy on heroku
+
+

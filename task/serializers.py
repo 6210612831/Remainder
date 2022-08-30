@@ -1,10 +1,12 @@
 # from .models import Task
 from ast import Raise
+from dataclasses import field
 from functools import cache
 import json
 from urllib import response
 from django.shortcuts import get_object_or_404
 from django_celery_beat.models import PeriodicTask as Task
+from .models import Task as TaskModel
 from django_celery_beat.models import IntervalSchedule
 from pkg_resources import require
 from rest_framework import serializers
@@ -14,9 +16,6 @@ from rest_framework import status
 from django_celery_beat.models import PeriodicTask
 
 
-from task.models import Storage
-
-UPLOAD_HOST = "http://127.0.0.1:8000"
 
 DAYS = 'days'
 HOURS = 'hours'
@@ -45,17 +44,13 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
 
 
     every = serializers.IntegerField(required = True)
-    # period = serializers.CharField(source='interval.period',required = True)
     period = serializers.ChoiceField(choices = PERIOD_CHOICES)
     start_time = serializers.DateTimeField(required = True)
     one_off = serializers.BooleanField(default=True)
     enabled = serializers.BooleanField(default=True)
     name = serializers.CharField(required = True)
-    path = serializers.CharField(required = False)
-    file = serializers.FileField(required = False)
     email = serializers.EmailField(required = True)
-    file_rename = serializers.CharField(required = False)
-    # file_repath = serializers.CharField(required = False)
+
 
     
     class Meta:
@@ -64,7 +59,6 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
         read_only_fields = ('every', 'period')
 
     def create(self, validated_data):
-        # print(validated_data)
         interval_obj = ''
         if len(IntervalSchedule.objects.filter(every = int(validated_data['every']),period = validated_data['period'])) == 0:
             interval_obj = IntervalSchedule.objects.create(
@@ -83,101 +77,13 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
             interval=interval_obj,
         )
 
-        storage_id = -1
-        try:
-            try:
-                path = validated_data['path']
-                path = path if path[-1] =="/" else path+"/"
-            except:
-                path = ""
-            file = validated_data['file']
-
-            payload = {
-                'path':path,
-                'file_name':file.name
-            }
-
-            with open(file.temporary_file_path(), 'rb') as f:
-                response = requests.post(f'{UPLOAD_HOST}/api/v1/upload', data = payload ,files={'file': f})
-        except :
-            data.delete()
-            raise Exception("file error")
-
-        if response.status_code == status.HTTP_201_CREATED:
-            storage_id = response.json()['storage_id']
-        elif response.status_code == status.HTTP_406_NOT_ACCEPTABLE:
-            data.delete()
-            raise Exception("This file is alreay exist")
-        else:
-            data.delete()
-            raise Exception("can't upload file because bad request about file")
-
-        data.kwargs= f'{{"task_id": "{str(data.id)}","storage_id": "{str(storage_id)}","email": "{validated_data["email"]}"}}' if  storage_id != -1 else f'{{"task_id": "{str(data.id)}","email": "{validated_data["email"]}"}}'
+        data.kwargs= f'{{"task_id": "{str(data.id)}","email": "{validated_data["email"]}"}}'
         data.save()
 
         return data
 
     def update(self, instance, validated_data):
         kwargs = json.loads(instance.kwargs)
-        storage=Storage.objects.get(id=int(kwargs["storage_id"]))
-        # try update file
-        try:
-            try:
-                path = validated_data['path']
-                path = path if path[-1] =="/" else path+"/"
-            except:
-                path = ""
-            file = validated_data['file']
-
-            new_payload = {
-                'path':path,
-                'file_name':file.name,
-                'update':True
-            }
-            old_payload={
-                'path': storage.path,
-                'update':True
-            }
-
-            # Create new file
-            with open(file.temporary_file_path(), 'rb') as f:
-                response = requests.post(f'{UPLOAD_HOST}/api/v1/upload', data = new_payload ,files={'file': f})
-            if response.status_code == status.HTTP_201_CREATED:
-                # Delete old file
-                requests.delete(f'{UPLOAD_HOST}/api/v1/upload/{storage.file_name}', data = old_payload)
-                # Update data in Storage
-                storage.file_name=file.name
-                storage.path=path
-                storage.save()
-            elif response.status_code == status.HTTP_406_NOT_ACCEPTABLE:
-                raise Exception("This file is alreay exist")
-            else:
-                raise Exception("can't upload file because bad request about file")
-        except :
-            pass
-            
-        # try rename file ,repath file
-        try:
-            file_rename = validated_data['file_rename']
-            # file_repath = validated_data['file_repath']
-            payload={
-                'path': storage.path,
-                'file_repath':path,
-                'file_rename':file_rename,
-            }
-            old_payload={
-                'path': storage.path,
-                'update':True
-            }
-            response = requests.patch(f'{UPLOAD_HOST}/api/v1/upload/{storage.file_name}', data = payload)
-            if response.status_code == status.HTTP_200_OK:
-                # Delete old file
-                requests.delete(f'{UPLOAD_HOST}/api/v1/upload/{storage.file_name}', data = old_payload)
-                storage.file_name=file_rename
-                storage.path=path
-                storage.save()
-        except:
-            pass
 
         interval = instance.interval
 
@@ -209,4 +115,15 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
             instance.save()
 
         return instance
+
+
+
+
+
+class TaskSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TaskModel
+        fields = "__all__"
+
 

@@ -1,0 +1,230 @@
+{% load setting_value %}
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+#container_wait, #container_todo {
+  float:left;
+  width: 30%;
+  height: 35px;
+  margin-left: 13%;
+  padding: 10px;
+  border: 1px solid black;
+}
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 2px 16px;
+}
+
+.button {
+  font-size: 1em;
+  padding: 10px;
+  color: rgb(0, 0, 0);
+  border: 2px solid #06D85F;
+  border-radius: 20px/50px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+}
+.button:hover {
+  background: #06D85F;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 0.5s;
+  visibility: hidden;
+  opacity: 0;
+}
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 30%;
+  position: relative;
+  transition: all 0.5s ease-in-out;
+}
+
+.popup h2 {
+  margin: 10px;
+  margin-top: 0;
+  color: #333;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 16px;
+}
+
+.popup .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  transition: all 200ms;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+.popup .close:hover {
+  color: #06D85F;
+}
+
+.popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+
+@media screen and (max-width: 700px){
+  .box{
+    width: 70%;
+  }
+  .popup{
+    width: 70%;
+  }
+}
+
+</style>
+<script>
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.id);
+  console.log(ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  if(ev.target.id == 'container_wait' || ev.target.id=='container_todo'){ev.target.appendChild(document.getElementById(data));}
+  else{ev.target.parentElement.appendChild(document.getElementById(data));}
+}
+
+function save_edit(){
+  // Container1_update_status_todo
+  children = document.querySelectorAll('.parent1 .card');
+  if(children.length != 0){
+    for(let index = 0; index < children.length; index++){
+      var xhr = new XMLHttpRequest();
+      xhr.open("PATCH", 'http://127.0.0.1:8000/api/v1/task/'+children[index].id, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
+      xhr.send(JSON.stringify({'status_todo': 'False'}));
+    }
+  }
+  // Container2_update_status_todo
+  children = document.querySelectorAll('.parent2 .card');
+  if(children.length != 0){
+    for(let index = 0; index < children.length; index++){
+      var xhr = new XMLHttpRequest();
+      xhr.open("PATCH", 'http://127.0.0.1:8000/api/v1/task/'+children[index].id, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
+      xhr.send(JSON.stringify({'status_todo': 'True'}));
+    }
+  }
+}
+
+function add_card(){
+  element = document.getElementById('add_card_name');
+  if(element.value == ''){
+    alert("Enter a card name");
+    element.focus();
+  }
+  else{
+    console.log('value : ',element.value);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", 'http://127.0.0.1:8000/api/v1/task', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
+    xhr.send(JSON.stringify({'name': element.value}));
+    window.location.href = 'http://127.0.0.1:8000';
+  }
+}
+
+function remove_card(name,id){
+  var answer = window.confirm("Confirm delete card name : "+name+" , id : "+id);
+  if(answer == true){
+    var xhr = new XMLHttpRequest();
+    xhr.open("DELETE", 'http://127.0.0.1:8000/api/v1/task/'+id, true);
+    xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
+    xhr.send();
+    window.location.href = 'http://127.0.0.1:8000';
+  }
+
+}
+
+function confirm_delete()
+    {
+        var answer = window.confirm("ยืนยันการลบ");
+        return answer;
+    }
+
+</script>
+</head>
+
+
+<!------------------------------------------------------------------------------------ BODY ------------------------------------------------------------------------------------>
+<body>
+
+<h1 align="center">TO DO LIST</h1>
+
+<div class="box">
+	<a class="button" href="#popup1">Add card</a>
+</div>
+
+
+<div id="popup1" class="overlay">
+	<div class="popup">
+		<h2>Add a card</h2>
+		<a class="close" href="#">&times;</a>
+		<div class="content">
+			Name : <input type="text"  id="add_card_name"> <input type="button" value="Add" onclick="add_card()">
+		</div>
+	</div>
+</div>
+<!--------------------- Container 1 --------------------->
+<div id="container_wait" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px;" class="parent1" >
+  {% for task in task_list %}
+    {% if task.status_todo == False %}
+      <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">
+        <h4><b>{{task.name}}</b></h4> 
+      </div>
+    {% endif %}
+  {% endfor %}
+
+</div>
+
+<!--------------------- Container 2 --------------------->
+<div id="container_todo" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px; " class="parent2">
+  {% for task in task_list %}
+    {% if task.status_todo == True %}
+      <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" >
+        <h4><b>{{task.name}}</b></h4> 
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<h1 align="center"><input type="submit" onclick="save_edit()" value="Save" style="height: 100%; font-size:x-large;"></h1>
+
+</body>
+</html>
+
