@@ -1,6 +1,5 @@
 {% load setting_value %}
 
-
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -101,6 +100,9 @@
 
 </style>
 <script>
+var HOST = "https://reminder-white.herokuapp.com"
+
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
@@ -123,7 +125,7 @@ function save_edit(){
   if(children.length != 0){
     for(let index = 0; index < children.length; index++){
       var xhr = new XMLHttpRequest();
-      xhr.open("PATCH", 'http://127.0.0.1:8000/api/v1/task/'+children[index].id, true);
+      xhr.open("PATCH", HOST+'/api/v1/task/'+children[index].id, true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
       xhr.send(JSON.stringify({'status_todo': 'False'}));
@@ -134,7 +136,7 @@ function save_edit(){
   if(children.length != 0){
     for(let index = 0; index < children.length; index++){
       var xhr = new XMLHttpRequest();
-      xhr.open("PATCH", 'http://127.0.0.1:8000/api/v1/task/'+children[index].id, true);
+      xhr.open("PATCH", HOST+'/api/v1/task/'+children[index].id, true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
       xhr.send(JSON.stringify({'status_todo': 'True'}));
@@ -155,11 +157,11 @@ function add_card(){
       console.log(xhr.response);
       }
     }
-    xhr.open("POST", 'http://127.0.0.1:8000/api/v1/task', true);
+    xhr.open("POST", HOST+'/api/v1/task', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
     xhr.send(JSON.stringify({'name': element.value}));
-    window.location.href = 'http://127.0.0.1:8000';
+    window.location.href = HOST;
   }
 }
 
@@ -167,10 +169,10 @@ function remove_card(name,id){
   var answer = window.confirm("Confirm delete card name : "+name+" , id : "+id);
   if(answer == true){
     var xhr = new XMLHttpRequest();
-    xhr.open("DELETE", 'http://127.0.0.1:8000/api/v1/task/'+id, true);
+    xhr.open("DELETE", HOST+'/api/v1/task/'+id, true);
     xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
     xhr.send();
-    window.location.href = 'http://127.0.0.1:8000';
+    window.location.href = HOST;
   }
 
 }

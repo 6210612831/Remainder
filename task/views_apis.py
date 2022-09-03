@@ -11,9 +11,6 @@ import json
 from .models import Task
 
 
-UPLOAD_HOST = "http://127.0.0.1:8000"
-
-
 # Create your views here.
 
 
