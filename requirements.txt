@@ -7,3 +7,4 @@ django-celery-beat==2.3.0
 gunicorn
 requests
 django-oauth-toolkit
+django-filter
