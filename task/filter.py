@@ -27,6 +27,7 @@ class TaskFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name="name" , lookup_expr="icontains")
     status_todo = django_filters.BooleanFilter(field_name="status_todo")
     status_alert = django_filters.BooleanFilter(field_name="status_alert")
+    owner__username = django_filters.CharFilter(field_name="owner__username")
 
     class Meta:
         model = Task

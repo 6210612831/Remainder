@@ -9,10 +9,9 @@ from django_celery_beat.models import PeriodicTask
 from rest_framework import permissions
 import json
 from .models import Task
-
+from django.contrib.auth.models import User
 
 # Create your views here.
-
 
 
 class PeriodTaskApiView(APIView):
@@ -42,7 +41,6 @@ class PeriodTaskApiView(APIView):
         else:
             return Response(task.errors, status=status.HTTP_401_UNAUTHORIZED)
         
-
 
 class PeriodTaskDetailApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -104,22 +102,27 @@ class TaskApiView(APIView):
     queryset = Task.objects.all()
 
     def get(self, request, *args, **kwargs):
-        data_set = Task.objects.all()
+        user = User.objects.get(id=request.data['user_id'])
+        data_set = Task.objects.filter(owner=user)
         tasks = TaskFilter(request.GET,queryset=data_set).qs
         
         task_context_list=[]
         for task in tasks:
             # task_context_list.append(task.__str__())
             task_context_list.append(task.context_data)
-        print(task_context_list)
         return Response(task_context_list, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
+        # print(request.data)
+        # print(request.user.username)
+        # request.data['user_id']=str(request.user.id)
+        # request.data['user_id']=str('2')
         task = TaskSerializer(data = request.data)
         if task.is_valid():
             task.save()
             return Response(task.validated_data, status=status.HTTP_201_CREATED)
         else:
+            print(task.is_valid())
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -130,24 +133,28 @@ class TaskDetailApiView(APIView):
     queryset = Task.objects.all()
 
     def get(self, request, *args, **kwargs):
-        task = get_object_or_404(Task, pk=kwargs['pk'])
-        kwargs = json.loads(task.kwargs)
+        user = User.objects.get(id=request.data['user_id'])
+        task = get_object_or_404(Task, pk=kwargs['pk'],owner=user)
         data = {
             'name':task.name,
             'status_todo':task.status_todo,
             'status_alert':task.status_alert,
+            'owner':task.owner.username
         }
         return Response(data, status=status.HTTP_200_OK)
 
     def patch(self, request, *args, **kwargs):
-        task = get_object_or_404(Task, pk=kwargs['pk'])
+        user = User.objects.get(id=request.data['user_id'])
+        task = get_object_or_404(Task, pk=kwargs['pk'],owner=user)
         serializer = TaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             task = serializer.save()
         return Response(task.__str__(), status=200)
 
     def delete(self, request, *args, **kwargs):
-        task = get_object_or_404(Task, pk=kwargs['pk'])
+        user = User.objects.get(id=request.data['user_id'])
+        task = get_object_or_404(Task, pk=kwargs['pk'],owner=user)
         context = task.__str__()
         task.delete()
         return Response(context, status=status.HTTP_204_NO_CONTENT)
+

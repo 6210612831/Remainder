@@ -100,7 +100,9 @@
 
 </style>
 <script>
-var HOST = "https://reminder-white.herokuapp.com"
+// var HOST = "https://reminder-white.herokuapp.com"
+var HOST = "http://127.0.0.1:8000"
+var TOKEN = "ZsqnlBA2MjxDv2WCcU9fvqehUPEtb9"
 
 
 function allowDrop(ev) {
@@ -119,7 +121,7 @@ function drop(ev) {
   else{ev.target.parentElement.appendChild(document.getElementById(data));}
 }
 
-function save_edit(){
+function save_edit_status(){
   // Container1_update_status_todo
   children = document.querySelectorAll('.parent1 .card');
   if(children.length != 0){
@@ -127,8 +129,8 @@ function save_edit(){
       var xhr = new XMLHttpRequest();
       xhr.open("PATCH", HOST+'/api/v1/task/'+children[index].id, true);
       xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
-      xhr.send(JSON.stringify({'status_todo': 'False'}));
+      xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
+      xhr.send(JSON.stringify({'status_todo': 'False','user_id':'{{request.user.id}}'}));
     }
   }
   // Container2_update_status_todo
@@ -138,14 +140,15 @@ function save_edit(){
       var xhr = new XMLHttpRequest();
       xhr.open("PATCH", HOST+'/api/v1/task/'+children[index].id, true);
       xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
-      xhr.send(JSON.stringify({'status_todo': 'True'}));
+      xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
+      xhr.send(JSON.stringify({'status_todo': 'True','user_id':'{{request.user.id}}'}));
     }
   }
 }
 
 function add_card(){
   element = document.getElementById('add_card_name');
+  // console.log(user_id);
   if(element.value == ''){
     alert("Enter a card name");
     element.focus();
@@ -159,8 +162,8 @@ function add_card(){
     }
     xhr.open("POST", HOST+'/api/v1/task', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
-    xhr.send(JSON.stringify({'name': element.value}));
+    xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
+    xhr.send(JSON.stringify({'name': element.value,'user_id':'{{request.user.id}}'}));
     window.location.href = HOST;
   }
 }
@@ -170,18 +173,13 @@ function remove_card(name,id){
   if(answer == true){
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", HOST+'/api/v1/task/'+id, true);
-    xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
-    xhr.send();
+    xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({'user_id':'{{request.user.id}}'}));
     window.location.href = HOST;
   }
-
 }
 
-function confirm_delete()
-    {
-        var answer = window.confirm("ยืนยันการลบ");
-        return answer;
-    }
 
 </script>
 </head>
@@ -189,21 +187,55 @@ function confirm_delete()
 
 <!------------------------------------------------------------------------------------ BODY ------------------------------------------------------------------------------------>
 <body>
-
+{% if request.user.is_authenticated %}
+<h1 align="center">TO DO LIST : {{request.user.username}} {{request.user.id}}</h1>
+{% else %}
 <h1 align="center">TO DO LIST</h1>
+{% endif %}
 
 <div class="box">
-	<a class="button" href="#popup1">Add card</a>
+  {% if request.user.is_authenticated %}
+  <a class="button" href="{% url 'task:logout' %}">Logout</a>
+  <a class="button" href="#popup_add_card">Add card</a>
+  {% else %}
+  <a class="button" href="#popup_login">Login</a>
+  {% endif %}
+	
+  
 </div>
 
 
-<div id="popup1" class="overlay">
+<div class="box">
+	
+</div>
+
+<!--------------------- Add Card --------------------->
+<div id="popup_add_card" class="overlay">
 	<div class="popup">
 		<h2>Add a card</h2>
 		<a class="close" href="#">&times;</a>
 		<div class="content">
 			Name : <input type="text"  id="add_card_name"> <input type="button" value="Add" onclick="add_card()">
 		</div>
+	</div>
+</div>
+<!--------------------- Login --------------------->
+<div id="popup_login" class="overlay">
+	<div class="popup">
+		<h2>Login</h2>
+		<a class="close" href="#">&times;</a>
+		<div class="content">
+      <form action="{% url 'task:login' %}" method="POST">
+        {% csrf_token %}
+        username : <input type="text" name="username" >
+        password : <input type="password" name="password">
+        <div style="margin-left: 35%; margin-top: 2em;">
+          <input type="submit" value="Login" style="margin-right: 1em;" class="button">
+          <input type="reset" value="Clear" class="button">
+        </div>
+      </form>
+      
+    </div>
 	</div>
 </div>
 <!--------------------- Container 1 --------------------->
@@ -229,7 +261,7 @@ function confirm_delete()
   {% endfor %}
 </div>
 
-<h1 align="center"><input type="submit" onclick="save_edit()" value="Save" style="height: 100%; font-size:x-large;"></h1>
+<h1 align="center"><input type="submit" onclick="save_edit_status()" value="Save" style="height: 100%; font-size:x-large;"></h1>
 
 </body>
 </html>

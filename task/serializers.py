@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 import requests
 from rest_framework import status
 from django_celery_beat.models import PeriodicTask
-
+from django.contrib.auth.models import User
 
 
 DAYS = 'days'
@@ -121,9 +121,24 @@ class PeriodicTaskSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-
+    name = serializers.CharField(required = True)
+    user_id = serializers.CharField(required = True)
     class Meta:
         model = TaskModel
-        fields = "__all__"
+        # fields = "__all__"
+        exclude = ['owner']
+        read_only_fields = ('user_id',)
 
+    def create(self, validated_data):
+        user_id=validated_data.pop('user_id')
+        user = User.objects.get(id=user_id)
+        instance=TaskModel.objects.create(name=validated_data['name'],owner=user)
+        return instance
 
+    @property
+    def context_data(self):
+        user=User.objects.get(id=self.user_id)
+        return {
+            'name': self.name,
+            'owner': user.username
+        }

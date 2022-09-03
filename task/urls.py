@@ -17,5 +17,8 @@ api_v1_urls = (
 urlpatterns = [
     path('api/v1/', include(api_v1_urls)),
     path("", views_fronts.index, name="index"),
+    path("login", views_fronts.login_view, name="login"),
+    path("logout", views_fronts.logout_view, name="logout"),
+
     # path('api/v1/', include(front_urls)),
 ]

@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -26,8 +25,6 @@ SECRET_KEY = 'django-insecure-0)ew2*9f@a^7uvdi8c)n=%udfy!9iwzp*gviw@1u-*0l=pgnvl
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -137,10 +134,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-REMAINDER_KEY = os.environ.get("REMAINDER_KEY", "gnFwJCZoCyEJqdRw800oQR3KVsIc29pO4be33sbZ")
-REMAINDER_SECRET = os.environ.get("REMAINDER_SECRET", "fimWOv5L80VLvRg3UXiesgAn9a1JoA7mRuGDYzH6ZvfkXTDtdb2VnlOzsTL3P9jGQI2JtQju3rZ6P8Iuuq7EoTDxWSa3yGiMd6u7DfgCmhk7xvOGQfLYRTiBFFiujDeK")
+REMAINDER_KEY = os.environ.get("REMAINDER_KEY", "Zq9c0Y8BOnNZ2aARWqLJD9vk1KPYIcy7ufcv30kt")
+REMAINDER_SECRET = os.environ.get("REMAINDER_SECRET", "IjHbwngCvV807EB9z1x3EBCT7ZhUI5NZui4YwRhwTZWLa5yIl7BDVFxzbp97qWAyYRIE53K2KpHKdwKUA8ovCqXpA5mtn4MWP958pr4QWXHFha5NPWp9ueDqkVDO8Lla")
 
-REMAINDER_TOKEN = os.environ.get("REMAINDER_TOKEN", "A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA")
+REMAINDER_TOKEN = os.environ.get("REMAINDER_TOKEN", "ZsqnlBA2MjxDv2WCcU9fvqehUPEtb9")
 
 
 
