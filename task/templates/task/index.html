@@ -149,8 +149,12 @@ function add_card(){
     element.focus();
   }
   else{
-    console.log('value : ',element.value);
     var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      console.log(xhr.response);
+      }
+    }
     xhr.open("POST", 'http://127.0.0.1:8000/api/v1/task', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', 'Bearer A07J9Vx7MQiHzJ2i9w8cb3v0kSYTBA');
@@ -216,9 +220,9 @@ function confirm_delete()
 <div id="container_todo" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px; " class="parent2">
   {% for task in task_list %}
     {% if task.status_todo == True %}
-      <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" >
-        <h4><b>{{task.name}}</b></h4> 
-      </div>
+    <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">
+      <h4><b>{{task.name}}</b></h4> 
+    </div>
     {% endif %}
   {% endfor %}
 </div>

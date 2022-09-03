@@ -1,2 +1,1 @@
-start scheduler.bat
-start worker.bat
+python request_for_token.py
