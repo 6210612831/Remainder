@@ -5,5 +5,5 @@ djangorestframework==3.13.1
 Django==4.0.4
 django-celery-beat==2.3.0
 gunicorn
-oauth2_provider
 requests
+django-oauth-toolkit
