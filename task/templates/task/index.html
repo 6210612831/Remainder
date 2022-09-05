@@ -98,6 +98,13 @@
   }
 }
 
+.card_content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #9790ff;
+}
+
 </style>
 <script>
 var HOST = "https://reminder-white.herokuapp.com"
@@ -108,6 +115,7 @@ var TOKEN = "ZsqnlBA2MjxDv2WCcU9fvqehUPEtb9"
 function allowDrop(ev) {
   ev.preventDefault();
 }
+
 
 function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
@@ -155,11 +163,11 @@ function add_card(){
   }
   else{
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      console.log(xhr.response);
-      }
-    }
+    // xhr.onreadystatechange = () => {
+    // if (xhr.readyState === 4) {
+    //   console.log(xhr.response);
+    //   }
+    // }
     xhr.open("POST", HOST+'/api/v1/task', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
@@ -176,6 +184,22 @@ function remove_card(name,id){
     xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify({'user_id':'{{request.user.id}}'}));
+    window.location.href = HOST;
+  }
+}
+
+function change_card_name(new_name,id){
+  console.log(new_name,id);
+  if(new_name == ''){
+    alert("New name cant be void text");
+    // document.getElementById(id).focus();
+  }
+  else{
+    var xhr = new XMLHttpRequest();
+    xhr.open("PATCH", HOST+'/api/v1/task/'+id, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer '+TOKEN);
+    xhr.send(JSON.stringify({'name': new_name,'user_id':'{{request.user.id}}'}));
     window.location.href = HOST;
   }
 }
@@ -204,10 +228,6 @@ function remove_card(name,id){
   
 </div>
 
-
-<div class="box">
-	
-</div>
 
 <!--------------------- Add Card --------------------->
 <div id="popup_add_card" class="overlay">
@@ -241,10 +261,20 @@ function remove_card(name,id){
 <!--------------------- Container 1 --------------------->
 <div id="container_wait" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px;" class="parent1" >
   {% for task in task_list %}
-    {% if task.status_todo == False %}
+    <!-- {% if task.status_todo == False %}
       <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">
         <h4><b>{{task.name}}</b></h4> 
       </div>
+    {% endif %} -->
+    {% if task.status_todo == False %}
+    <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" >
+      <h4><b>{{task.name}}</b></h4> 
+    </div>
+    <div class="card_content" ondragover="False">
+      content
+      <a class="button" style="float: right; padding: 2px;" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">Delete</a>
+    </div>
+    
     {% endif %}
   {% endfor %}
 
@@ -252,16 +282,74 @@ function remove_card(name,id){
 
 <!--------------------- Container 2 --------------------->
 <div id="container_todo" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px; " class="parent2">
-  {% for task in task_list %}
+  <!-- {% for task in task_list %}
     {% if task.status_todo == True %}
+    <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" >
+      <h4><b>{{task.name}}</b></h4> 
+    </div>
+    <div class="card_content" >
+      <p>content</p>
+    </div>
+    
+    {% endif %}
+  {% endfor %} -->
+  {% for task in task_list %}
+  <!-- {% if task.status_todo == False %}
     <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">
       <h4><b>{{task.name}}</b></h4> 
     </div>
+  {% endif %} -->
+    {% if task.status_todo == True %}
+    <div class="card" draggable="true" ondragstart="drag(event)" id="{{task.id}}" >
+      <h4><b>{{task.name}}</b></h4> 
+    </div>
+    <div class="card_content" ondragover="False">
+      content
+      <a class="button" style="float: right; padding: 2px;" onclick="remove_card(name='{{task.name}}',id='{{task.id}}')">Delete</a>
+    </div>
+    
     {% endif %}
   {% endfor %}
 </div>
 
 <h1 align="center"><input type="submit" onclick="save_edit_status()" value="Save" style="height: 100%; font-size:x-large;"></h1>
+
+<script>
+  var coll = document.getElementsByClassName("card");
+  var card_content_list = document.getElementsByClassName("card_content");
+  var i;
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      var j;
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        // close all card_content that open
+        for (j = 0; j < card_content_list.length; j++) {
+          card_content_list[j].style.display = "none";
+          card_content_list[j].contentEditable="false";
+        }
+        content.style.display = "block";
+        this.contentEditable="true";
+        content.contentEditable = "false";
+        // this.focus();
+        this.addEventListener("blur",function(){
+          change_card_name(this.innerText,this.id);
+        })
+      }
+    });
+    // coll[i].addEventListener('input', function() {
+    //     console.log('An edit input has been detected');
+    //     console.log(coll[i]);
+    //     });
+
+  };
+  
+</script>
+
+
 
 </body>
 </html>
