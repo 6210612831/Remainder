@@ -107,15 +107,14 @@
 
 </style>
 <script>
-var HOST = "https://reminder-white.herokuapp.com"
-// var HOST = "http://127.0.0.1:8000"
-var TOKEN = "ZsqnlBA2MjxDv2WCcU9fvqehUPEtb9"
+// var HOST = "https://reminder-white.herokuapp.com"
+var HOST = "http://127.0.0.1:8000"
+var TOKEN = "KNg2j3LloxyGxtKGTMRXJWMQogAIfw"
 
 
 function allowDrop(ev) {
   ev.preventDefault();
 }
-
 
 function drag(ev) {
   ev.dataTransfer.setData("text", ev.target.id);
@@ -205,6 +204,12 @@ function change_card_name(new_name,id){
 }
 
 
+var fail_message = '{{fail_message}}';
+if(fail_message != ""){
+  alert(fail_message);
+  window.location.href = "#popup_register";
+}
+
 </script>
 </head>
 
@@ -212,10 +217,12 @@ function change_card_name(new_name,id){
 <!------------------------------------------------------------------------------------ BODY ------------------------------------------------------------------------------------>
 <body>
 {% if request.user.is_authenticated %}
-<h1 align="center">TO DO LIST : {{request.user.username}} {{request.user.id}}</h1>
+<h1 align="center">TO DO LIST : {{request.user.username}} </h1>
 {% else %}
 <h1 align="center">TO DO LIST</h1>
 {% endif %}
+
+
 
 <div class="box">
   {% if request.user.is_authenticated %}
@@ -223,9 +230,8 @@ function change_card_name(new_name,id){
   <a class="button" href="#popup_add_card">Add card</a>
   {% else %}
   <a class="button" href="#popup_login">Login</a>
+  <a class="button" href="#popup_register">Register</a>
   {% endif %}
-	
-  
 </div>
 
 
@@ -239,6 +245,7 @@ function change_card_name(new_name,id){
 		</div>
 	</div>
 </div>
+
 <!--------------------- Login --------------------->
 <div id="popup_login" class="overlay">
 	<div class="popup">
@@ -258,6 +265,37 @@ function change_card_name(new_name,id){
     </div>
 	</div>
 </div>
+
+<!--------------------- Register --------------------->
+<div id="popup_register" class="overlay">
+	<div class="popup">
+		<h2>Register</h2>
+		<a class="close" href="#">&times;</a>
+		<div class="content">
+      <form action="{% url 'task:register' %}" method="POST">
+        {% csrf_token %}
+        <table style="width: 100%;">
+          <td>
+            username   : <input type="text" name="username" >
+          </td>
+          <td>
+            password : <input type="password" name="password">
+          </td>
+          <td>
+            re-password : <input type="password" name="re_password">
+          </td>
+        </table>
+        
+        <div style="margin-left: 35%; margin-top: 2em;">
+          <input type="submit" value="Login" style="margin-right: 1em;" class="button">
+          <input type="reset" value="Clear" class="button">
+        </div>
+      </form>
+      
+    </div>
+	</div>
+</div>
+
 <!--------------------- Container 1 --------------------->
 <div id="container_wait" ondrop="drop(event)" ondragover="allowDrop(event)" style="height: 500px;" class="parent1" >
   {% for task in task_list %}

@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 
 
 class Task(models.Model):
-    name = models.CharField(max_length = 100, blank = False ,unique=True)
+    name = models.CharField(max_length = 100, blank = False)
     status_todo = models.BooleanField(default=False)
     status_alert = models.BooleanField(default=False)
     owner = models.ForeignKey(User,on_delete=models.CASCADE)

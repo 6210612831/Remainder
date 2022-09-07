@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='Task',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
+                ('name', models.CharField(max_length=100)),
                 ('status_todo', models.BooleanField(default=False)),
                 ('status_alert', models.BooleanField(default=False)),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
