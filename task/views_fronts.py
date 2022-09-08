@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import *
 from django.urls import reverse
 
-HOST = "https://reminder-white.herokuapp.com"
+HOST = "https://white-reminder.herokuapp.com"
 
 
 
@@ -24,6 +24,7 @@ def index(request):
         if response.status_code == status.HTTP_200_OK:
             return render(request, "task/index.html",{'task_list':response.json() if len(response.json()) != 0 else []})
         else:
+            print(response.status_code)
             return render(request, "task/index.html",{'task_list':[]})
 
 def login_view(request):
@@ -39,7 +40,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             response = requests.get(f'{HOST}/api/v1/task', json={'user_id':str(user.id)}, headers={"Authorization": f"Bearer {setting.REMAINDER_TOKEN}"})  
-            return render(request, "task/index.html",{'task_list':response.json() if len(response.json()) != 0 else [],'login_message':'Login Succress'})
+            return render(request, "task/index.html",{'task_list':response.json(),'login_message':'Login Succress'})
         else:
             return render(request, "task/index.html",{'task_list':[],'login_message':'Wrong username or password'})
     return HttpResponseRedirect(reverse("task:index"))
