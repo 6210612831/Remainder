@@ -107,8 +107,8 @@
 
 </style>
 <script>
-var HOST = "https://reminder-white.herokuapp.com"
-// var HOST = "http://127.0.0.1:8000"
+//
+var HOST = "http://127.0.0.1:8000"
 var TOKEN = "KNg2j3LloxyGxtKGTMRXJWMQogAIfw"
 
 
@@ -204,10 +204,30 @@ function change_card_name(new_name,id){
 }
 
 
-var fail_message = '{{fail_message}}';
-if(fail_message != ""){
-  alert(fail_message);
+var register_message = '{{register_message}}';
+if(register_message == "register success"){
+  alert(register_message);
+  
+}
+else if(register_message != ""){
+  alert(register_message);
   window.location.href = "#popup_register";
+}
+
+var login_message = '{{login_message}}';
+if(login_message == "Login Succress"){
+  alert(login_message);
+  
+}
+else if(login_message != ""){
+  alert(login_message);
+  window.location.href = "#popup_login";
+}
+
+var logout_message = '{{logout_message}}';
+if(logout_message != ""){
+  alert(logout_message);
+  
 }
 
 </script>

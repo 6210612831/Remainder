@@ -9,8 +9,8 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import *
 from django.urls import reverse
 
-HOST = "https://reminder-white.herokuapp.com"
-# HOST = "http://127.0.0.1:8000"
+HOST = "http://127.0.0.1:8000"
+
 
 
 def test(request):
@@ -34,11 +34,14 @@ def login_view(request):
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
+
+                
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("task:index"))
+            response = requests.get(f'{HOST}/api/v1/task', json={'user_id':str(user.id)}, headers={"Authorization": f"Bearer {setting.REMAINDER_TOKEN}"})  
+            return render(request, "task/index.html",{'task_list':response.json(),'login_message':'Login Succress'})
         else:
-            return HttpResponseRedirect(reverse("task:index"))
+            return render(request, "task/index.html",{'task_list':[],'login_message':'Wrong username or password'})
     return HttpResponseRedirect(reverse("task:index"))
 
 def register(request):
@@ -52,37 +55,34 @@ def register(request):
         # first_name = request.POST["first_name"]
         # last_name = request.POST["last_name"]
         # Check username is already taken
-        fail_message = ""
+        register_message = ""
         if User.objects.filter(username=username).first():
-            fail_message =  "This username is already taken"
+            register_message =  "This username is already taken"
         # Check the validity of a Password
         elif (len(password) < 8):
-            fail_message =  "Password must have at least 8"
+            register_message =  "Password must have at least 8"
         elif not re.search("[a-z]", password):
-            fail_message =  "Password must have at least 1 of a-z"
+            register_message =  "Password must have at least 1 of a-z"
         elif not re.search("[A-Z]", password):
-            fail_message =  "Password must have at least 1 of A-Z"
+            register_message =  "Password must have at least 1 of A-Z"
         elif not re.search("[0-9]", password):
-            fail_message =  "Password must have at least 1 of 0-9"
+            register_message =  "Password must have at least 1 of 0-9"
         # Check re-password is same as password
         elif password != re_password:
-            fail_message =  "Invalid password confirm"
+            register_message =  "Invalid password confirm"
         # Add Object User
-        if fail_message == "":
+        if register_message == "":
             add_user = User(username=username)
             add_user.set_password(password)
             add_user.save()
             login(request, add_user)
-
-        response = requests.get(f'{HOST}/api/v1/task', json={'user_id':str(request.user.id)}, headers={"Authorization": f"Bearer {setting.REMAINDER_TOKEN}"})
-        if response.status_code == status.HTTP_200_OK:
-            return render(request, "task/index.html",{'task_list':response.json(),'fail_message':fail_message})
+            return render(request, "task/index.html",{'task_list':[],'register_message':'register success'})
         else:
-            return render(request, "task/index.html",{'task_list':[],'fail_message':fail_message})
+            return render(request, "task/index.html",{'task_list':[],'register_message':register_message})
     return HttpResponseRedirect(reverse("task:index"))
 
 
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("task:index"))
+    return render(request, "task/index.html",{'task_list':[],'logout_message':'logout success'})
