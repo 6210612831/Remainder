@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import *
 from django.urls import reverse
 
-HOST = "http://127.0.0.1:8000"
+HOST = "https://reminder-white.herokuapp.com"
 
 
 
